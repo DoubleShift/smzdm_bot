@@ -37,5 +37,6 @@ jobs:
       - name: Working
         env:
           COOKIES: ${{ secrets.SMZDM_COOKIE }}
-          SERVERCHAN_SECRETKEY: ${{ secrets.SERVERCHAN_SECRETKEY }}
+          TG_TOKEN: ${{ secrets.TG_TOKEN }}
+          TG_USERID: ${{ secrets.TG_USERID }}
         run: python main.py #>SMZDM_Bot.log
