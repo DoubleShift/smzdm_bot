@@ -5,9 +5,41 @@
 """
 import requests,os
 from sys import argv
-
 import config
-from utils.serverchan_push import push_to_wechat
+
+
+TG_TOKEN = ""
+TG_USERID = ""
+
+#telegram
+if os.environ["TG_TOKEN"] != "":
+    TG_TOKEN = os.environ["TG_TOKEN"]
+if os.environ["TG_USERID"] != "":
+    TG_USERID = os.environ["TG_USERID"]
+    
+def sendTg(text, desp):
+    if TG_TOKEN != '' or TG_USERID != '':
+
+        url = 'https://api.telegram.org/bot' + TG_TOKEN + '/sendMessage'
+        headers = {'Content-type': "application/x-www-form-urlencoded"}
+        body = 'chat_id=' + TG_USERID + '&text=' + urllib.parse.quote(text) + '\n\n' + urllib.parse.quote(desp) + '&disable_web_page_preview=true'
+        response = json.dumps(requests.post(url, data=body,headers=headers).json(),ensure_ascii=False)
+
+        data = json.loads(response)
+        if data['ok'] == True:
+            print('\nTelegram发送通知消息完成\n')
+        elif data['error_code'] == 400:
+            print('\n请主动给bot发送一条消息并检查接收用户ID是否正确。\n')
+        elif data['error_code'] == 401:
+            print('\nTelegram bot token 填写错误。\n')
+        else:
+            print('\n发送通知调用API失败！！\n')
+            print(data)
+    else:
+        print('\n您未提供Telegram的APP推送Token，取消Bark推送消息通知\n')
+        pass
+
+
 
 class SMZDM_Bot(object):
     def __init__(self):
@@ -56,11 +88,7 @@ if __name__ == '__main__':
     sb.load_cookie_str(cookies)
     res = sb.checkin()
     print(res)
-    SERVERCHAN_SECRETKEY = os.environ["SERVERCHAN_SECRETKEY"]
-    print('sc_key: ', SERVERCHAN_SECRETKEY)
-    if isinstance(SERVERCHAN_SECRETKEY,str) and len(SERVERCHAN_SECRETKEY)>0:
-        print('检测到 SCKEY， 准备推送')
-        push_to_wechat(text = '什么值得买每日签到',
-                        desp = str(res),
-                        secretKey = SERVERCHAN_SECRETKEY)
+
+
+    sendTg('什么值得买每日签到',str(res))
     print('代码完毕')
